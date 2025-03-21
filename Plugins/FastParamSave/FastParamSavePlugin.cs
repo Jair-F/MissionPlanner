@@ -6,14 +6,16 @@ using MissionPlanner;
 using MissionPlanner.Controls;
 using System.Collections.Generic;
 using Microsoft.Scripting.Utils;
+using MissionPlanner.Utilities;
+using IronPython.Runtime.Operations;
 
 namespace FastParamSave
 {
     public class Plugin : MissionPlanner.Plugin.Plugin
     {
 		private string missionPlannerPluginDirectory = "C:\\Program Files (x86)\\Mission Planner\\plugins\\";
-		private string fastParamDirectory = "C:\\work\\testFlights\\";
-		private string fastParamParamFileName = "params.param";
+		//private string fastParamDirectory = "C:\\work\\testFlights\\";
+		//private string fastParamParamFileName = "params.param";
 		private string fastParamScriptFileName = "fastParamsScript.bat";
 
 		ToolStripMenuItem but;
@@ -50,6 +52,16 @@ namespace FastParamSave
 			ToolStripItemCollection col = Host.FDMenuMap.Items;
 			col.Add(but);
 
+			// loading settings
+			if(!Settings.Instance.ContainsKey("FastParamSaveWorkingDir"))
+			{
+				Settings.Instance["FastParamSaveWorkingDir"] = "C:\\work\\testFlights\\";
+			}
+			if (!Settings.Instance.ContainsKey("FastParamSaveFileName"))
+			{
+				Settings.Instance["FastParamSaveFileName"] = "params.param";
+			}
+
 			return true;
         }
 
@@ -70,6 +82,29 @@ namespace FastParamSave
 				Read_And_Save_Params();
 				return true;
 			}
+			else  if (keyData == (Keys.Control | Keys.Alt | Keys.W))
+			{
+				string new_working_dir = Settings.Instance["FastParamSaveWorkingDir"];
+				if (InputBox.Show("Enter new path for params", "Enter new path for params", ref new_working_dir) == DialogResult.OK)
+				{
+					new_working_dir = new_working_dir.strip();
+					if (new_working_dir[new_working_dir.Length - 1] != '\\')
+						new_working_dir += "\\";
+
+					Settings.Instance["FastParamSaveWorkingDir"] = new_working_dir;
+				}
+				return true;
+			}
+			else if (keyData == (Keys.Control | Keys.Alt | Keys.N))
+			{
+				string new_param_file_name = Settings.Instance["FastParamSaveFileName"];
+				if (InputBox.Show("Enter new param file name", "Enter new param file name", ref new_param_file_name) == DialogResult.OK)
+				{
+					new_param_file_name = new_param_file_name.strip();
+					Settings.Instance["FastParamSaveFileName"] = new_param_file_name;
+				}
+				return true;
+			}
 
 			return false;
 		}
@@ -83,7 +118,7 @@ namespace FastParamSave
 
 				try
 				{
-					StreamWriter sw = new StreamWriter(fastParamDirectory + fastParamParamFileName);
+					StreamWriter sw = new StreamWriter(Settings.Instance["FastParamSaveWorkingDir"] + Settings.Instance["FastParamSaveFileName"]);
 					SortedDictionary<string, string> paramList = new SortedDictionary<string, string>();
 					foreach (string paramName in MissionPlanner.MainV2.comPort.MAV.param.Keys)
 					{
@@ -112,7 +147,7 @@ namespace FastParamSave
 				p.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
 				p.StartInfo.FileName = "C:\\Windows\\system32\\cmd.exe";
 				p.StartInfo.WorkingDirectory = missionPlannerPluginDirectory;
-				p.StartInfo.Arguments = "/C " + fastParamScriptFileName + " \"" + fastParamDirectory + "\"" + " \"" + git_msg + "\""; // the /C means execute the following command
+				p.StartInfo.Arguments = "/C " + fastParamScriptFileName + " \"" + Settings.Instance["FastParamSaveWorkingDir"] + "\"" + " \"" + git_msg + "\""; // the /C means execute the following command
 				p.Start();
 			}
 			else
