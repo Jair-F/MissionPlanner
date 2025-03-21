@@ -12,8 +12,8 @@ namespace FastParamSave
     public class Plugin : MissionPlanner.Plugin.Plugin
     {
 		private string missionPlannerPluginDirectory = "C:\\Program Files (x86)\\Mission Planner\\plugins\\";
-		private string fastParamDirectory = "C:\\work\\";
-		private string fastParamParamFileName = "paramOutFile.param";
+		private string fastParamDirectory = "C:\\work\\testFlights\\";
+		private string fastParamParamFileName = "params.param";
 		private string fastParamScriptFileName = "fastParamsScript.bat";
 
 		ToolStripMenuItem but;
