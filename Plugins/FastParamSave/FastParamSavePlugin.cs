@@ -14,8 +14,9 @@ namespace FastParamSave
 {
     public class Plugin : MissionPlanner.Plugin.Plugin
     {
-       
-        public override string Name
+		//ToolStripMenuItem but;
+
+		public override string Name
         {
             get { return "FastParamSave"; }
         }
@@ -34,6 +35,12 @@ namespace FastParamSave
         public override bool Init()
         {
 			MainV2.instance.ProcessCmdKeyCallback += this.Instance_ProcessCmdKeyCallback;
+
+			//but = new ToolStripMenuItem("FastParamSave");
+			//but.Click += on_but_Click;
+			//ToolStripItemCollection col = Host.FPMenuMap.Items;
+			//col.Add(but);
+
 			return true;
         }
 
@@ -41,12 +48,42 @@ namespace FastParamSave
         {
             if (keyData == (Keys.Control | Keys.Alt | Keys.P))
 			{
-                Read_And_Save_Params();
+				Read_And_Save_Params();
+				return true;
+			}
 
-				string git_msg = "";
-				InputBox.Show("Enter git Messge", "Enter git Messge", ref git_msg);
-                //Console.WriteLine("Plugin FastParamSave: git messge: " + git_msg);
+			return false;
+		}
 
+
+		private void Read_And_Save_Params()
+		{
+			string git_msg = "";
+			if (InputBox.Show("Enter git Messge", "Enter git Messge", ref git_msg) == DialogResult.OK)
+			{
+				//Console.WriteLine("Plugin FastParamSave: git messge: " + git_msg);
+
+				try
+				{
+					StreamWriter sw = new StreamWriter("C:\\work\\paramOutFile.param");
+					foreach (string paramName in MissionPlanner.MainV2.comPort.MAV.param.Keys)
+					{
+						//Console.Write("Plugin FastParamSave: paramName: " + paramName);
+						var paramValue = MissionPlanner.MainV2.comPort.MAV.param[paramName];
+						//Console.WriteLine(", value: " + paramValue.ToString());
+
+						sw.WriteLine(paramName + ',' + paramValue.ToString());
+					}
+					sw.Close();
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine("Plugin FastParamSave: Exception: cant write to param out file");
+				}
+				finally
+				{
+					Console.WriteLine("Plugin: FastParamSave: written params to file");
+				}
 				// run cmd command for git commit
 				Process p = new Process();
 				p.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
@@ -54,41 +91,21 @@ namespace FastParamSave
 				p.StartInfo.WorkingDirectory = @"C:\work";
 				p.StartInfo.Arguments = "/C C:\\work\\fastParamsScript.bat \"" + git_msg + "\""; // the /C means execute the following command
 				p.Start();
-
-				return true;
 			}
-
-			return false;
+			else
+			{
+				Console.WriteLine("Plugin FastParamSave: saving params cancled");
+			}
 		}
 
-        private void Read_And_Save_Params()
-        {
-			try
-			{
-				StreamWriter sw = new StreamWriter("C:\\work\\paramOutFile.param");
-				foreach (string paramName in MissionPlanner.MainV2.comPort.MAV.param.Keys)
-				{
-                    //Console.Write("Plugin FastParamSave: paramName: " + paramName);
-					var paramValue = MissionPlanner.MainV2.comPort.MAV.param[paramName];
-                    //Console.WriteLine(", value: " + paramValue.ToString());
-
-					sw.WriteLine(paramName + ',' + paramValue.ToString());
-				}
-				sw.Close();
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine("Plugin FastParamSave: Exception: cant write to param out file");
-			}
-			finally
-			{
-				Console.WriteLine("Plugin: FastParamSave: written params to file");
-			}
-		}
+		//void on_but_Click(object sender, EventArgs e)
+		//{
+		//	Read_And_Save_Params();
+		//}
 
 		public override bool Loaded()
         {
-            Console.WriteLine("Plugin: FastParam: succesfully loaded FastParmaPlugin");
+			Console.WriteLine("Plugin: FastParam: succesfully loaded FastParmaPlugin");
             return true;
         }
 
