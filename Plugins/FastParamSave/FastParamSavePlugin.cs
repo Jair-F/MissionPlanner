@@ -1,20 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using MissionPlanner.Utilities;
 using System.IO;
 using System.Windows.Forms;
 using System.Diagnostics;
 using MissionPlanner;
 using MissionPlanner.Controls;
-using MissionPlanner.Utilities;
 
 namespace FastParamSave
 {
     public class Plugin : MissionPlanner.Plugin.Plugin
     {
-		//ToolStripMenuItem but;
+		ToolStripMenuItem but;
 
 		public override string Name
         {
@@ -36,17 +31,34 @@ namespace FastParamSave
         {
 			MainV2.instance.ProcessCmdKeyCallback += this.Instance_ProcessCmdKeyCallback;
 
-			//but = new ToolStripMenuItem("FastParamSave");
-			//but.Click += on_but_Click;
-			//ToolStripItemCollection col = Host.FPMenuMap.Items;
-			//col.Add(but);
+			return true;
+        }
+
+		public override bool Loaded()
+        {
+			Console.WriteLine("Plugin: FastParam: succesfully loaded FastParmaPlugin");
+
+			but = new ToolStripMenuItem("Fast Param Save");
+			but.Click += On_But_Click;
+			ToolStripItemCollection col = Host.FDMenuMap.Items;
+			col.Add(but);
 
 			return true;
         }
 
-        private bool Instance_ProcessCmdKeyCallback(ref System.Windows.Forms.Message msg, System.Windows.Forms.Keys keyData)
+        public override bool Loop()
         {
-            if (keyData == (Keys.Control | Keys.Alt | Keys.P))
+			return true;
+        }
+
+        public override bool Exit()
+        {
+            return true;
+        }
+
+		private bool Instance_ProcessCmdKeyCallback(ref System.Windows.Forms.Message msg, System.Windows.Forms.Keys keyData)
+		{
+			if (keyData == (Keys.Control | Keys.Alt | Keys.P))
 			{
 				Read_And_Save_Params();
 				return true;
@@ -54,7 +66,6 @@ namespace FastParamSave
 
 			return false;
 		}
-
 
 		private void Read_And_Save_Params()
 		{
@@ -98,30 +109,9 @@ namespace FastParamSave
 			}
 		}
 
-		//void on_but_Click(object sender, EventArgs e)
-		//{
-		//	Read_And_Save_Params();
-		//}
-
-		public override bool Loaded()
-        {
-			Console.WriteLine("Plugin: FastParam: succesfully loaded FastParmaPlugin");
-            return true;
-        }
-
-        public override bool Loop()
-        {
-            /*
-            MainV2.comPort.MAV.param
-            MainV2.comPort.GetParam
-            */
-
-			return true;
-        }
-
-        public override bool Exit()
-        {
-            return true;
-        }
-    }
+		void On_But_Click(object sender, EventArgs e)
+		{
+			Read_And_Save_Params();
+		}
+	}
 }
