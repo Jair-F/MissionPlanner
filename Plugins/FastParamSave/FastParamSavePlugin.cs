@@ -4,11 +4,18 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using MissionPlanner;
 using MissionPlanner.Controls;
+using System.Collections.Generic;
+using Microsoft.Scripting.Utils;
 
 namespace FastParamSave
 {
     public class Plugin : MissionPlanner.Plugin.Plugin
     {
+		private string missionPlannerPluginDirectory = "C:\\Program Files (x86)\\Mission Planner\\plugins\\";
+		private string fastParamDirectory = "C:\\work\\";
+		private string fastParamParamFileName = "paramOutFile.param";
+		private string fastParamScriptFileName = "fastParamsScript.bat";
+
 		ToolStripMenuItem but;
 
 		public override string Name
@@ -76,15 +83,20 @@ namespace FastParamSave
 
 				try
 				{
-					StreamWriter sw = new StreamWriter("C:\\work\\paramOutFile.param");
+					StreamWriter sw = new StreamWriter(fastParamDirectory + fastParamParamFileName);
+					SortedDictionary<string, string> paramList = new SortedDictionary<string, string>();
 					foreach (string paramName in MissionPlanner.MainV2.comPort.MAV.param.Keys)
 					{
-						//Console.Write("Plugin FastParamSave: paramName: " + paramName);
-						var paramValue = MissionPlanner.MainV2.comPort.MAV.param[paramName];
-						//Console.WriteLine(", value: " + paramValue.ToString());
+						string paramValue = MissionPlanner.MainV2.comPort.MAV.param[paramName].ToString();
 
-						sw.WriteLine(paramName + ',' + paramValue.ToString());
+						paramList.Add(paramName, paramValue);
 					}
+
+					foreach (KeyValuePair<string, string> parameter in paramList)
+					{
+						sw.WriteLine(parameter.Key + ',' + parameter.Value);
+					}
+
 					sw.Close();
 				}
 				catch (Exception ex)
@@ -99,8 +111,8 @@ namespace FastParamSave
 				Process p = new Process();
 				p.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
 				p.StartInfo.FileName = "C:\\Windows\\system32\\cmd.exe";
-				p.StartInfo.WorkingDirectory = @"C:\work";
-				p.StartInfo.Arguments = "/C C:\\work\\fastParamsScript.bat \"" + git_msg + "\""; // the /C means execute the following command
+				p.StartInfo.WorkingDirectory = missionPlannerPluginDirectory;
+				p.StartInfo.Arguments = "/C " + fastParamScriptFileName + " \"" + fastParamDirectory + "\"" + " \"" + git_msg + "\""; // the /C means execute the following command
 				p.Start();
 			}
 			else
