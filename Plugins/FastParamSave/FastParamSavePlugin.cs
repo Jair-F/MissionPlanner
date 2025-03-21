@@ -43,12 +43,16 @@ namespace FastParamSave
 			{
                 Read_And_Save_Params();
 
-                // run cmd command for git commit
+				string git_msg = "";
+				InputBox.Show("Enter git Messge", "Enter git Messge", ref git_msg);
+                //Console.WriteLine("Plugin FastParamSave: git messge: " + git_msg);
+
+				// run cmd command for git commit
 				Process p = new Process();
 				p.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
 				p.StartInfo.FileName = "C:\\Windows\\system32\\cmd.exe";
 				p.StartInfo.WorkingDirectory = @"C:\work";
-				p.StartInfo.Arguments = "/C C:\\work\\fastParamsScript.bat " + DateTime.Now.ToString(); // the /C means execute the following command
+				p.StartInfo.Arguments = "/C C:\\work\\fastParamsScript.bat \"" + git_msg + "\""; // the /C means execute the following command
 				p.Start();
 
 				return true;

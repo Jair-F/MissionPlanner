@@ -27,4 +27,10 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Update="SimpleGridUI.resx">
+      <DependentUpon>SimpleGridUI.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>
